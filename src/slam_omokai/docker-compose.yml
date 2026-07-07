@@ -1,0 +1,54 @@
+# SLAM_OMOKAI in Docker
+#
+#   docker compose build
+#   xhost +local:                              # allow container to use your X server
+#   docker compose --profile gui up            # Gazebo GUI + RViz
+#   docker compose --profile headless up       # server only, no GUI (goals via CLI)
+#
+# Shell inside the running stack:
+#   docker compose exec slam-omokai-gui bash
+#
+# Notes:
+# - network_mode+ipc host: ROS 2 DDS discovery works with host tools, so you can
+#   run `ros2 topic list` / RViz on the host against the containerized stack.
+# - devices: pass ONLY a Mesa-drivable (Intel/AMD) render node. The image ships
+#   Mesa only — if EGL enumerates an NVIDIA node (e.g. mapping all of /dev/dri
+#   on a hybrid laptop), gz sim's ogre2 engine SEGFAULTS at startup. Find your
+#   node with:  ls -l /dev/dri/by-path  +  lspci | grep -i vga
+# - No usable GPU? Remove `devices` and uncomment LIBGL_ALWAYS_SOFTWARE (CPU
+#   rendering via llvmpipe — slower but works everywhere, verified).
+# - NVIDIA: install nvidia-container-toolkit, remove `devices`, uncomment `gpus`.
+# - `./docker/run.sh` does this GPU selection automatically — prefer it if you
+#   don't want to hand-tune this file.
+
+x-common: &common
+  build:
+    context: .
+    dockerfile: docker/Dockerfile
+  image: slam_omokai:humble
+  network_mode: host
+  ipc: host
+  devices:
+    - /dev/dri/renderD128:/dev/dri/renderD128   # Intel iGPU on this machine
+  environment: &common-env
+    ROS_DOMAIN_ID: "0"
+    # LIBGL_ALWAYS_SOFTWARE: "1"        # CPU rendering fallback (slow but works)
+  # gpus: all                           # NVIDIA (needs nvidia-container-toolkit)
+  stop_grace_period: 10s
+
+services:
+  slam-omokai-gui:
+    <<: *common
+    profiles: ["gui"]
+    environment:
+      <<: *common-env
+      DISPLAY: ${DISPLAY:-:0}
+      QT_X11_NO_MITSHM: "1"
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    command: ros2 launch slam_omokai bringup.launch.py
+
+  slam-omokai-headless:
+    <<: *common
+    profiles: ["headless"]
+    command: ros2 launch slam_omokai bringup.launch.py headless:=true rviz:=false

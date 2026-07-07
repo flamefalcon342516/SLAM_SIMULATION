@@ -1,0 +1,8 @@
+# Build context = the slam_omokai package root. Keep the image build lean.
+.git
+.vscode/
+build/
+install/
+log/
+docker-compose.yml
+docker/README.md

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Disable Fast DDS shared-memory transport inside the container.
+
+     The container runs as root, so its SHM segments in /dev/shm are not
+     writable by the host user. Discovery (UDP multicast) still succeeds, but
+     same-host data exchange silently picks SHM and no messages ever arrive —
+     host-side `ros2 topic list` works while `ros2 topic echo` shows nothing.
+     Forcing UDPv4 makes container <-> host communication just work. -->
+<profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+  <transport_descriptors>
+    <transport_descriptor>
+      <transport_id>udp_only</transport_id>
+      <type>UDPv4</type>
+    </transport_descriptor>
+  </transport_descriptors>
+  <participant profile_name="udp_only_participant" is_default_profile="true">
+    <rtps>
+      <userTransports>
+        <transport_id>udp_only</transport_id>
+      </userTransports>
+      <useBuiltinTransports>false</useBuiltinTransports>
+    </rtps>
+  </participant>
+</profiles>

@@ -1,0 +1,9 @@
+# colcon build artifacts (both the outer and the nested src/ workspace)
+build/
+install/
+log/
+
+# editor / misc
+.vscode/
+*.pyc
+__pycache__/

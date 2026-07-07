@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Gazebo Harmonic (gz sim 8) systems — the ros-humble-ros-gzharmonic
+       variant installed on this machine targets Harmonic, so plugin names
+       follow the gz-sim convention (see bcr_bot's gz.xacro). -->
+
+  <!-- NOTE: the Sensors system is loaded once at WORLD level
+       (worlds/omokai_world.sdf). Loading it again per-model creates a
+       duplicate render scene ("Scene already exists") and segfaults the
+       sensors render thread. -->
+  <gazebo>
+    <plugin filename="gz-sim-joint-state-publisher-system"
+            name="gz::sim::systems::JointStatePublisher">
+    </plugin>
+
+    <!-- Differential drive actuator (2 wheels + casters). Encoder odometry is
+         published on /wheel_odom for comparison/debugging; the /odom used by
+         SLAM + Nav2 comes from the ground-truth OdometryPublisher below (kept
+         from the skid-steer era — switch scan/odom consumers to /wheel_odom
+         if realistic encoder odometry is wanted, it should be usable now that
+         the wheels no longer scrub during rotation). -->
+    <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+      <left_joint>left_wheel_joint</left_joint>
+      <right_joint>right_wheel_joint</right_joint>
+      <wheel_separation>0.45</wheel_separation>
+      <wheel_radius>0.10</wheel_radius>
+      <odom_publish_frequency>30</odom_publish_frequency>
+      <topic>/cmd_vel</topic>
+      <odom_topic>/wheel_odom</odom_topic>
+      <tf_topic>/wheel_odom_tf</tf_topic>
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_footprint</child_frame_id>
+    </plugin>
+
+    <!-- Ground-truth odometry (sim-only shortcut): publishes the model's true
+         motion as /odom + odom->base_footprint TF, so SLAM isn't poisoned by
+         skid-steer wheel slip. -->
+    <plugin filename="gz-sim-odometry-publisher-system"
+            name="gz::sim::systems::OdometryPublisher">
+      <odom_frame>odom</odom_frame>
+      <robot_base_frame>base_footprint</robot_base_frame>
+      <odom_topic>/odom</odom_topic>
+      <tf_topic>/tf</tf_topic>
+      <odom_publish_frequency>30</odom_publish_frequency>
+      <dimensions>2</dimensions>
+    </plugin>
+  </gazebo>
+
+  <!-- 360° 2D lidar for SLAM + costmap obstacle marking -->
+  <gazebo reference="lidar_link">
+    <sensor name="gpu_lidar" type="gpu_lidar">
+      <topic>scan</topic>
+      <update_rate>10</update_rate>
+      <gz_frame_id>lidar_link</gz_frame_id>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.25</min>
+          <max>12.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.005</stddev>
+        </noise>
+      </lidar>
+      <always_on>1</always_on>
+      <visualize>true</visualize>
+    </sensor>
+  </gazebo>
+
+</robot>
