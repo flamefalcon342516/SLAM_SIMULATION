@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""
-SLAM Toolbox (online async) — live mapping + localization.
-Publishes /map and the map->odom transform; no pre-built map needed.
 
-    ros2 launch slam_omokai slam.launch.py
-"""
 from os.path import join
 
 from ament_index_python.packages import get_package_share_directory

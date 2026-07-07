@@ -1,15 +1,4 @@
 #!/usr/bin/env python3
-"""
-    ros2 launch slam_omokai bringup.launch.py rviz:=false
-    ros2 launch slam_omokai bringup.launch.py headless:=true   # no Gazebo GUI
-
-
-IMPORTANT: Nav2 only becomes active ~25 s after launch (sim must be up first).
-Goals clicked before the "NAV2 IS ACTIVE" banner appears in this terminal are
-silently dropped — wait for the banner, then click. Every accepted goal logs
-"Begin navigating from ..." here; if you click and that line never shows up,
-the goal never reached Nav2.
-"""
 from os.path import join
 
 from ament_index_python.packages import get_package_share_directory

@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""
-Gazebo Harmonic (gz sim 8) + robot spawn + ros_gz bridge + robot_state_publisher.
 
-    ros2 launch slam_omokai sim.launch.py
-    ros2 launch slam_omokai sim.launch.py headless:=true   # server only, no GUI
-"""
 import tempfile
 from os.path import join
 
