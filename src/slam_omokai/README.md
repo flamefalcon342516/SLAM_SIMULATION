@@ -5,9 +5,9 @@ with **slam_toolbox** and navigates it autonomously with **Nav2** (ROS 2 Humble)
 No pre-built map is needed: Nav2 plans through the map SLAM is building in real time.
 
 ```
-ros2 launch slam_omokai bringup.launch.py              # sim + SLAM + Nav2 + RViz
+ros2 launch slam_omokai bringup.launch.py             
 ros2 launch slam_omokai bringup.launch.py rviz:=false
-ros2 launch slam_omokai bringup.launch.py headless:=true   # no Gazebo GUI
+ros2 launch slam_omokai bringup.launch.py headless:=true   
 ```
 
 Or run the whole stack in Docker — no ROS install needed on the host

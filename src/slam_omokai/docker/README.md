@@ -11,8 +11,7 @@ Everything (Gazebo Harmonic, slam_toolbox, Nav2, RViz) baked into one image on
 ```bash
 cd ~/SLAM_OMOKAI/src/slam_omokai
 
-docker compose build                      # ~10 min first time (downloads gz-harmonic + Nav2)
-
+docker compose build                      # ~10 min first time 
 xhost +local:                             # let the container open windows on your X server
 docker compose --profile gui up           # sim + SLAM + Nav2 + Gazebo GUI + RViz
 ```
@@ -62,33 +61,6 @@ Append any other command to override the default bringup, e.g. a shell:
 ```bash
 docker run -it --rm --network host --ipc host slam_omokai bash
 ```
-
-## GPU / rendering options
-
-`run.sh` handles this automatically: it passes in every **Mesa-drivable**
-(Intel/AMD) render node, skips NVIDIA nodes, and falls back to CPU rendering
-if none exist. If you use compose or plain docker instead:
-
-| Situation | What to do |
-|---|---|
-| Intel/AMD GPU | Map that GPU's render node, e.g. `--device /dev/dri/renderD128` (find it: `ls -l /dev/dri/by-path` + `lspci \| grep -i VGA`). |
-| Hybrid Intel+NVIDIA laptop | **Map only the Intel node.** Mapping all of `/dev/dri` lets EGL pick the NVIDIA node, which the image's Mesa can't drive — gz sim's ogre2 engine segfaults at startup (verified on this machine). |
-| NVIDIA GPU (dGPU only) | Install `nvidia-container-toolkit`, use `--gpus all` / uncomment `gpus: all` in compose, don't map `/dev/dri`. Or with run.sh: `GPUS=nvidia ./docker/run.sh gui`. |
-| No GPU at all | `-e LIBGL_ALWAYS_SOFTWARE=1`, no devices — llvmpipe CPU rendering. Slower (the 360-ray lidar at 10 Hz is the load) but verified working. |
-
-## Why host networking?
-
-Two reasons:
-
-1. **DDS discovery** — with `network_mode: host` + `ipc: host`, ROS 2 nodes in
-   the container and on the host discover each other automatically; no
-   discovery-server or domain bridging needed.
-2. **gz-transport** — the launch already pins `GZ_IP=127.0.0.1`
-   (see `sim.launch.py`), which behaves identically inside the container.
-
-If you want full isolation instead, switch to the default bridge network — the
-stack is self-contained in one container so it still works, you just lose
-host-side `ros2`/RViz access.
 
 ## Files
 

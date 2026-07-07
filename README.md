@@ -8,9 +8,7 @@ no pre-built map needed.
 [`src/slam_omokai/`](src/slam_omokai/):**
 
 - [`src/slam_omokai/README.md`](src/slam_omokai/README.md) — usage, goal
-  sending, troubleshooting
-- [`src/slam_omokai/NAV2_ARCHITECTURE.md`](src/slam_omokai/NAV2_ARCHITECTURE.md)
-  — full top-to-bottom system/Nav2 deep dive
+  sending, architecture, troubleshooting
 - [`src/slam_omokai/docker/README.md`](src/slam_omokai/docker/README.md) — run
   everything in Docker, no ROS install needed
 
